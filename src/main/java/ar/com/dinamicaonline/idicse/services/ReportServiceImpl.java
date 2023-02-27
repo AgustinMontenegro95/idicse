@@ -6,51 +6,62 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-//import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import ar.com.dinamicaonline.idicse.dto.ClientDTO;
-import ar.com.dinamicaonline.idicse.models.Persona;
+import ar.com.dinamicaonline.idicse.security.SSLUtilities;
 
 @Service
 public class ReportServiceImpl implements ReportService{
 
+    @Autowired
+    ReceiveAndSendService receiveAndSendService;
+
     @Override
     public ResponseEntity<?> getClientReport(ClientDTO clientDTO) {
+        //Solo version de prueba - deshabilitado ssl
+        try {
+            SSLUtilities.trustAllHttpsCertificates();
+        } catch (Exception e) {
+            //Manejar la excepción
+        }
+
         Map<String, Object> responseBody = new HashMap<>();
+        
+        //Verification entry
+        System.out.println(clientDTO.getDni());
+        System.out.println(clientDTO.getSexo());
 
         //JSON send
-        Map<String, Object> sendBody = new HashMap<>();
-        sendBody.put("PersonaDNI", clientDTO.getDni());
-        sendBody.put("PersonaSexo", clientDTO.getSexo());
-        sendBody.put("UsuarioId", "dinamicawse");
-        sendBody.put("PasswordClave", "geor7ivwR3"); 
-        //Request https://www.idicse.org.ar/pruebaweb/ws/crearInforme - post - Json send
+        String body = "{\"PersonaDNI\": \""+clientDTO.getDni()+"\", "+
+            "\"PersonaSexo\": \""+clientDTO.getSexo()+"\", "+
+            "\"UsuarioId\": \"dinamicawse\", "+
+            "\"PasswordClave\":\"1234567890\" "+
+            "}";
+
+        //verification sent
+        System.out.println("Body sent: " + body);
+
+        //Request https://www.idicse.org.ar/pruebaapi/ws/crearInforme - post - Json send
         URL url;
         try {
-            url = new URL("https://www.idicse.org.ar/pruebaweb/ws/crearInforme");
+            url = new URL("https://www.idicse.org.ar/pruebaapi/ws/crearInforme");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
 
-            /* String username = "dinamicawse";
-            String password = "geor7ivwR3";
-
-            String auth = username + ":" + password;
-            byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.UTF_8));
-            String authHeaderValue = "Basic " + new String(encodedAuth);
-            connection.setRequestProperty("Authorization", authHeaderValue); */
-
-            String json = sendBody.toString();
+            String json = body;
             byte[] postData = json.getBytes(StandardCharsets.UTF_8);
 
             connection.setRequestProperty("Content-Length", Integer.toString(postData.length));
@@ -62,7 +73,7 @@ public class ReportServiceImpl implements ReportService{
             System.out.println("Response code: " + responseCode);
             
             if(responseCode == HttpURLConnection.HTTP_OK){
-                //obtener respuesta
+                //Get response
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(connection.getInputStream()));
                 String inputLine;
@@ -73,17 +84,20 @@ public class ReportServiceImpl implements ReportService{
                 }
                 in.close();
 
-                ObjectMapper mapper = new ObjectMapper();
+                JSONParser parser = new JSONParser();
+                JSONObject jsonResponse = new JSONObject();
+                try {
+                    jsonResponse = (JSONObject) parser.parse(response.toString());
+                } catch (ParseException e) {
+                    System.out.println("Error al decodificar respuesta de BIND");
+                    System.out.println(response.toString());
+                }
 
-                Persona persona = mapper.readValue(response.toString(), Persona.class);
+                responseBody.put("response", jsonResponse);
 
-                System.out.println("Nombre: " + persona.getPersonaNombre());
-                System.out.println("Apellido: " + persona.getPersonaApellido());
+                //guardo datos en tabla "Api_ReceiveAndSend"
+                receiveAndSendService.saveReceiveAndSend(body, jsonResponse.toString(), clientDTO.getDni());
 
-                responseBody.put("Nombre: " , persona.getPersonaNombre());
-                responseBody.put("Apellido: " , persona.getPersonaApellido());
-
-                System.out.println(response.toString());
             } else {
                 //error
                 System.out.println("POST request failed");
@@ -95,10 +109,40 @@ public class ReportServiceImpl implements ReportService{
             e.printStackTrace();
         }
 
-        responseBody.put("Agustin" , "Hola");
-
         return new ResponseEntity<>(responseBody,  HttpStatus.OK);
     }
 
     
 }
+
+    /* 
+       {
+    "estado": -9,
+    "mensaje": "Error",
+    "excepcion": "Usuario y/o contraseña incorrecto/s",
+    "datos": null
+}
+     */
+
+/* 
+    {
+    "estado": 0,
+    "mensaje": "No se recibieron todos los parámetros requeridos",
+    "excepcion": {
+        "PersonaSexo": [
+            "El campo persona sexo es requerido"
+        ]
+    },
+    "datos": null
+}
+ */
+
+/* 
+    Respuesta 38780170
+ {
+    "estado": -3,
+    "mensaje": "Error",
+    "excepcion": "Persona no encontrada",
+    "datos": null
+}
+ */
