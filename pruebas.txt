@@ -1,0 +1,32 @@
+Ejemplos de JSON de entrada a los endpoints.
+
+/api/v1/obtener_informe
+{
+    "dni": "16107269",
+    "sexo": "M"
+}
+
+/api/v1/confirmar_operacion
+{
+    "numeroOperacion": "9065234",
+    "importeTotal": "15000",
+    "cantidadCuotas": "12",
+    "importeCuota": "200",
+    "fechaPrimerVto": "12-03-2023",
+    "dni": "16107269"
+}
+
+/api/v1/afectar_operacion
+{
+    "numeroOperacion": "9065234",
+    "importe": "15000",
+    "cantidadCuotas": "12",
+    "dni": "16107269"
+}
+
+/api/v1/desafectar_operacion
+{
+    "numeroOperacion": "9065234",
+    "dni": "16107269"
+}
+
