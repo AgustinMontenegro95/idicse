@@ -21,10 +21,10 @@ import ar.com.dinamicaonline.idicse.dto.GetReportDTO;
 import ar.com.dinamicaonline.idicse.dto.UnaffectedOperationDTO;
 import ar.com.dinamicaonline.idicse.dto.AffectOperationDTO;
 import ar.com.dinamicaonline.idicse.dto.ConfirmOperationDTO;
-import ar.com.dinamicaonline.idicse.security.SSLUtilities;
+//import ar.com.dinamicaonline.idicse.security.SSLUtilities;
 
 @Service
-public class ReportServiceImpl implements ReportService{
+public class ReportServiceImpl implements ReportService {
 
     @Autowired
     ReceiveAndSendService receiveAndSendService;
@@ -34,36 +34,39 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     public ResponseEntity<?> getClientReport(GetReportDTO clientDTO) {
-        //Solo version de prueba - deshabilitado ssl
-        try {
-            SSLUtilities.trustAllHttpsCertificates();
-        } catch (Exception e) {
-            //Manejar la excepción
-        }
+        // Solo version de prueba - deshabilitado ssl
+        /*
+         * try {
+         * SSLUtilities.trustAllHttpsCertificates();
+         * } catch (Exception e) {
+         * // Manejar la excepción
+         * }
+         */
 
         Map<String, Object> responseBody = new HashMap<>();
 
-        //Get user and pass
+        // Get user and pass
         String userIdicse = parameterService.fetchParamByParameterName("IDICSE-USER");
         String passIdicse = parameterService.fetchParamByParameterName("IDICSE-PASS");
-        
-        //Verification entry
+
+        // Verification entry
         System.out.println(clientDTO.getDni());
         System.out.println(clientDTO.getSexo());
         System.out.println(userIdicse);
         System.out.println(passIdicse);
 
-        //JSON send
-        String body = "{\"PersonaDNI\": \""+clientDTO.getDni()+"\", "+
-            "\"PersonaSexo\": \""+clientDTO.getSexo()+"\", "+
-            "\"UsuarioId\": \""+ userIdicse +"\", "+
-            "\"PasswordClave\":\""+ passIdicse +"\" "+
-            "}";
+        // JSON send
+        String body = "{\"PersonaDNI\": \"" + clientDTO.getDni() + "\", " +
+                "\"PersonaSexo\": \"" + clientDTO.getSexo() + "\", " +
+                "\"UsuarioId\": \"" + userIdicse + "\", " +
+                "\"PasswordClave\":\"" + passIdicse + "\" " +
+                "}";
 
-        //verification sent
+        // verification sent
         System.out.println("Body sent: " + body);
 
-        //Request https://www.idicse.org.ar/pruebaapi/ws/crearInforme - post - Json send
+        // Request https://www.idicse.org.ar/pruebaapi/ws/crearInforme - post - Json
+        // send
         URL url;
         try {
             url = new URL("https://www.idicse.org.ar/pruebaapi/ws/crearInforme");
@@ -83,9 +86,9 @@ public class ReportServiceImpl implements ReportService{
             }
             int responseCode = connection.getResponseCode();
             System.out.println("Response code: " + responseCode);
-            
-            if(responseCode == HttpURLConnection.HTTP_OK){
-                //Get response
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Get response
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(connection.getInputStream()));
                 String inputLine;
@@ -107,11 +110,11 @@ public class ReportServiceImpl implements ReportService{
 
                 responseBody.put("respuesta", jsonResponse);
 
-                //guardo datos en tabla "Api_ReceiveAndSend"
+                // guardo datos en tabla "Api_ReceiveAndSend"
                 receiveAndSendService.saveReceiveAndSend(body, jsonResponse.toString(), clientDTO.getDni());
 
             } else {
-                //error
+                // error
                 System.out.println("POST request failed");
             }
 
@@ -121,25 +124,27 @@ public class ReportServiceImpl implements ReportService{
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(responseBody,  HttpStatus.OK);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<?> getConfirmOperation(ConfirmOperationDTO confirmOperationDTO) {
-        //Solo version de prueba - deshabilitado ssl
-        try {
-            SSLUtilities.trustAllHttpsCertificates();
-        } catch (Exception e) {
-            //Manejar la excepción
-        }
+        // Solo version de prueba - deshabilitado ssl
+        /*
+         * try {
+         * SSLUtilities.trustAllHttpsCertificates();
+         * } catch (Exception e) {
+         * // Manejar la excepción
+         * }
+         */
 
         Map<String, Object> responseBody = new HashMap<>();
 
-        //Get user and pass
+        // Get user and pass
         String userIdicse = parameterService.fetchParamByParameterName("IDICSE-USER");
         String passIdicse = parameterService.fetchParamByParameterName("IDICSE-PASS");
-        
-        //Verification entry
+
+        // Verification entry
         System.out.println(confirmOperationDTO.getNumeroOperacion());
         System.out.println(confirmOperationDTO.getImporteTotal());
         System.out.println(confirmOperationDTO.getCantidadCuotas());
@@ -149,20 +154,21 @@ public class ReportServiceImpl implements ReportService{
         System.out.println(userIdicse);
         System.out.println(passIdicse);
 
-        //JSON send
-        String body = "{\"numeroOperacion\": \""+confirmOperationDTO.getNumeroOperacion()+"\", "+
-            "\"importeTotal\": \""+confirmOperationDTO.getImporteTotal()+"\", "+
-            "\"cantidadCuotas\": \""+confirmOperationDTO.getCantidadCuotas()+"\", "+
-            "\"importeCuota\": \""+confirmOperationDTO.getImporteCuota()+"\", "+
-            "\"fechaPrimerVto\": \""+confirmOperationDTO.getFechaPrimerVto()+"\", "+
-            "\"UsuarioId\": \""+ userIdicse +"\", "+
-            "\"PasswordClave\":\""+ passIdicse +"\" "+
-            "}";
+        // JSON send
+        String body = "{\"numeroOperacion\": \"" + confirmOperationDTO.getNumeroOperacion() + "\", " +
+                "\"importeTotal\": \"" + confirmOperationDTO.getImporteTotal() + "\", " +
+                "\"cantidadCuotas\": \"" + confirmOperationDTO.getCantidadCuotas() + "\", " +
+                "\"importeCuota\": \"" + confirmOperationDTO.getImporteCuota() + "\", " +
+                "\"fechaPrimerVto\": \"" + confirmOperationDTO.getFechaPrimerVto() + "\", " +
+                "\"UsuarioId\": \"" + userIdicse + "\", " +
+                "\"PasswordClave\":\"" + passIdicse + "\" " +
+                "}";
 
-        //verification sent
+        // verification sent
         System.out.println("Body sent: " + body);
 
-        //Request https://www.idicse.org.ar/pruebaapi/ws/confirmarOperacion - post - Json send
+        // Request https://www.idicse.org.ar/pruebaapi/ws/confirmarOperacion - post -
+        // Json send
         URL url;
         try {
             url = new URL("https://www.idicse.org.ar/pruebaapi/ws/confirmarOperacion");
@@ -182,9 +188,9 @@ public class ReportServiceImpl implements ReportService{
             }
             int responseCode = connection.getResponseCode();
             System.out.println("Response code: " + responseCode);
-            
-            if(responseCode == HttpURLConnection.HTTP_OK){
-                //Get response
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Get response
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(connection.getInputStream()));
                 String inputLine;
@@ -206,11 +212,11 @@ public class ReportServiceImpl implements ReportService{
 
                 responseBody.put("respuesta", jsonResponse);
 
-                //guardo datos en tabla "Api_ReceiveAndSend"
+                // guardo datos en tabla "Api_ReceiveAndSend"
                 receiveAndSendService.saveReceiveAndSend(body, jsonResponse.toString(), confirmOperationDTO.getDni());
 
             } else {
-                //error
+                // error
                 System.out.println("POST request failed");
             }
 
@@ -220,25 +226,27 @@ public class ReportServiceImpl implements ReportService{
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(responseBody,  HttpStatus.OK);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<?> getAffectOperation(AffectOperationDTO affectOperationDTO) {
-        //Solo version de prueba - deshabilitado ssl
-        try {
-            SSLUtilities.trustAllHttpsCertificates();
-        } catch (Exception e) {
-            //Manejar la excepción
-        }
+        // Solo version de prueba - deshabilitado ssl
+        /*
+         * try {
+         * SSLUtilities.trustAllHttpsCertificates();
+         * } catch (Exception e) {
+         * // Manejar la excepción
+         * }
+         */
 
         Map<String, Object> responseBody = new HashMap<>();
 
-        //Get user and pass
+        // Get user and pass
         String userIdicse = parameterService.fetchParamByParameterName("IDICSE-USER");
         String passIdicse = parameterService.fetchParamByParameterName("IDICSE-PASS");
-        
-        //Verification entry
+
+        // Verification entry
         System.out.println(affectOperationDTO.getNumeroOperacion());
         System.out.println(affectOperationDTO.getImporte());
         System.out.println(affectOperationDTO.getCantidadCuotas());
@@ -246,18 +254,19 @@ public class ReportServiceImpl implements ReportService{
         System.out.println(userIdicse);
         System.out.println(passIdicse);
 
-        //JSON send
-        String body = "{\"numeroOperacion\": \""+affectOperationDTO.getNumeroOperacion()+"\", "+
-            "\"importe\": \""+affectOperationDTO.getImporte()+"\", "+
-            "\"cantidadCuotas\": \""+affectOperationDTO.getCantidadCuotas()+"\", "+
-            "\"UsuarioId\": \""+ userIdicse +"\", "+
-            "\"PasswordClave\":\""+ passIdicse +"\" "+
-            "}";
+        // JSON send
+        String body = "{\"numeroOperacion\": \"" + affectOperationDTO.getNumeroOperacion() + "\", " +
+                "\"importe\": \"" + affectOperationDTO.getImporte() + "\", " +
+                "\"cantidadCuotas\": \"" + affectOperationDTO.getCantidadCuotas() + "\", " +
+                "\"UsuarioId\": \"" + userIdicse + "\", " +
+                "\"PasswordClave\":\"" + passIdicse + "\" " +
+                "}";
 
-        //verification sent
+        // verification sent
         System.out.println("Body sent: " + body);
 
-        //Request https://www.idicse.org.ar/pruebaapi/ws/afectarOperacion - post - Json send
+        // Request https://www.idicse.org.ar/pruebaapi/ws/afectarOperacion - post - Json
+        // send
         URL url;
         try {
             url = new URL("https://www.idicse.org.ar/pruebaapi/ws/afectarOperacion");
@@ -277,9 +286,9 @@ public class ReportServiceImpl implements ReportService{
             }
             int responseCode = connection.getResponseCode();
             System.out.println("Response code: " + responseCode);
-            
-            if(responseCode == HttpURLConnection.HTTP_OK){
-                //Get response
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Get response
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(connection.getInputStream()));
                 String inputLine;
@@ -301,11 +310,11 @@ public class ReportServiceImpl implements ReportService{
 
                 responseBody.put("respuesta", jsonResponse);
 
-                //guardo datos en tabla "Api_ReceiveAndSend"
+                // guardo datos en tabla "Api_ReceiveAndSend"
                 receiveAndSendService.saveReceiveAndSend(body, jsonResponse.toString(), affectOperationDTO.getDni());
 
             } else {
-                //error
+                // error
                 System.out.println("POST request failed");
             }
 
@@ -315,40 +324,43 @@ public class ReportServiceImpl implements ReportService{
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(responseBody,  HttpStatus.OK);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<?> getUnaffectedOperation(UnaffectedOperationDTO unaffectedOperationDTO) {
-        //Solo version de prueba - deshabilitado ssl
-        try {
-            SSLUtilities.trustAllHttpsCertificates();
-        } catch (Exception e) {
-            //Manejar la excepción
-        }
+        // Solo version de prueba - deshabilitado ssl
+        /*
+         * try {
+         * SSLUtilities.trustAllHttpsCertificates();
+         * } catch (Exception e) {
+         * // Manejar la excepción
+         * }
+         */
 
         Map<String, Object> responseBody = new HashMap<>();
 
-        //Get user and pass
+        // Get user and pass
         String userIdicse = parameterService.fetchParamByParameterName("IDICSE-USER");
         String passIdicse = parameterService.fetchParamByParameterName("IDICSE-PASS");
-        
-        //Verification entry
+
+        // Verification entry
         System.out.println(unaffectedOperationDTO.getNumeroOperacion());
         System.out.println(unaffectedOperationDTO.getDni());
         System.out.println(userIdicse);
         System.out.println(passIdicse);
 
-        //JSON send
-        String body = "{\"numeroOperacion\": \""+unaffectedOperationDTO.getNumeroOperacion()+"\", "+
-            "\"UsuarioId\": \""+ userIdicse +"\", "+
-            "\"PasswordClave\":\""+ passIdicse +"\" "+
-            "}";
+        // JSON send
+        String body = "{\"numeroOperacion\": \"" + unaffectedOperationDTO.getNumeroOperacion() + "\", " +
+                "\"UsuarioId\": \"" + userIdicse + "\", " +
+                "\"PasswordClave\":\"" + passIdicse + "\" " +
+                "}";
 
-        //verification sent
+        // verification sent
         System.out.println("Body sent: " + body);
 
-        //Request https://www.idicse.org.ar/pruebaapi/ws/desafectarOperacion - post - Json send
+        // Request https://www.idicse.org.ar/pruebaapi/ws/desafectarOperacion - post -
+        // Json send
         URL url;
         try {
             url = new URL("https://www.idicse.org.ar/pruebaapi/ws/desafectarOperacion");
@@ -368,9 +380,9 @@ public class ReportServiceImpl implements ReportService{
             }
             int responseCode = connection.getResponseCode();
             System.out.println("Response code: " + responseCode);
-            
-            if(responseCode == HttpURLConnection.HTTP_OK){
-                //Get response
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                // Get response
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(connection.getInputStream()));
                 String inputLine;
@@ -392,11 +404,12 @@ public class ReportServiceImpl implements ReportService{
 
                 responseBody.put("respuesta", jsonResponse);
 
-                //guardo datos en tabla "Api_ReceiveAndSend"
-                receiveAndSendService.saveReceiveAndSend(body, jsonResponse.toString(), unaffectedOperationDTO.getDni());
+                // guardo datos en tabla "Api_ReceiveAndSend"
+                receiveAndSendService.saveReceiveAndSend(body, jsonResponse.toString(),
+                        unaffectedOperationDTO.getDni());
 
             } else {
-                //error
+                // error
                 System.out.println("POST request failed");
             }
 
@@ -406,71 +419,69 @@ public class ReportServiceImpl implements ReportService{
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(responseBody,  HttpStatus.OK);
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    
 }
 
-
-    //OBTENER REPORTE
-    /* 
-       {
-    "estado": -9,
-    "mensaje": "Error",
-    "excepcion": "Usuario y/o contraseña incorrecto/s",
-    "datos": null
-}
-     */
-
-/* 
-    {
-    "estado": 0,
-    "mensaje": "No se recibieron todos los parámetros requeridos",
-    "excepcion": {
-        "PersonaSexo": [
-            "El campo persona sexo es requerido"
-        ]
-    },
-    "datos": null
-}
+// OBTENER REPORTE
+/*
+ * {
+ * "estado": -9,
+ * "mensaje": "Error",
+ * "excepcion": "Usuario y/o contraseña incorrecto/s",
+ * "datos": null
+ * }
  */
 
-/* 
-    Respuesta 38780170
- {
-    "estado": -3,
-    "mensaje": "Error",
-    "excepcion": "Persona no encontrada",
-    "datos": null
-}
+/*
+ * {
+ * "estado": 0,
+ * "mensaje": "No se recibieron todos los parámetros requeridos",
+ * "excepcion": {
+ * "PersonaSexo": [
+ * "El campo persona sexo es requerido"
+ * ]
+ * },
+ * "datos": null
+ * }
  */
 
- //CONFIRMAR OPERACION
+/*
+ * Respuesta 38780170
+ * {
+ * "estado": -3,
+ * "mensaje": "Error",
+ * "excepcion": "Persona no encontrada",
+ * "datos": null
+ * }
+ */
 
- /* 
-   {
-    "response": {
-        "estado": 0,
-        "datos": null,
-        "excepcion": {
-            "importeTotal": [
-                "El campo importe total es requerido"
-            ],
-            "numeroOperacion": [
-                "El campo numero operacion debe ser un número"
-            ],
-            "importeCuota": [
-                "El campo importe cuota es requerido"
-            ],
-            "fechaPrimerVto": [
-                "El campo fecha primer vto es requerido"
-            ],
-            "cantidadCuotas": [
-                "El campo cantidad cuotas es requerido"
-            ]
-        },
-        "mensaje": "No se recibieron todos los parámetros requeridos"
-    }
-}
-  */
+// CONFIRMAR OPERACION
+
+/*
+ * {
+ * "response": {
+ * "estado": 0,
+ * "datos": null,
+ * "excepcion": {
+ * "importeTotal": [
+ * "El campo importe total es requerido"
+ * ],
+ * "numeroOperacion": [
+ * "El campo numero operacion debe ser un número"
+ * ],
+ * "importeCuota": [
+ * "El campo importe cuota es requerido"
+ * ],
+ * "fechaPrimerVto": [
+ * "El campo fecha primer vto es requerido"
+ * ],
+ * "cantidadCuotas": [
+ * "El campo cantidad cuotas es requerido"
+ * ]
+ * },
+ * "mensaje": "No se recibieron todos los parámetros requeridos"
+ * }
+ * }
+ */

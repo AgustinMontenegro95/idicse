@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 public class IdicseApplication {
 
 	public static void main(String[] args) {
+		System.setProperty("javax.net.ssl.trustStore", "certificates/truststore.jks");
+		System.setProperty("javax.net.ssl.trustStorePassword", "dinamica");
 		SpringApplication.run(IdicseApplication.class, args);
 	}
 
